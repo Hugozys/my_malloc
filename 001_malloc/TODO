@@ -1,0 +1,54 @@
+STEP1: You are going to implement malloc and free functions in two different ways
+
+#First fit implementation
+#Best  fit implementation
+
+malloc does the following things:
+1. allocate size bytes and returns a pointer to the allocated memory and the memory is not initialized
+
+2. If size = 0, returns either NULL or a unique
+pointer value that can later be successfully passed to free()
+
+3. it returns a pointer to the allocated memory, which
+is suitably aligned for any built-in type.
+
+4. On error it returns NULL
+
+
+
+free does the following things:
+1. free the memory space pointed to by ptr, which must
+have been returned by a previous call to malloc().
+
+2. If free(ptr) has already been called before,
+undefined behavior occurs.
+
+3. If ptr is NULL, no operation is performed.
+
+4. return no value
+
+
+NOTE:
+Normally, malloc() allocates memory from the heap,and
+adjusts the size of the heap as required, using
+sbrk(2). When allocating blocks of memory larger than
+MMAP_THRESHOLD bytes, the glibcmalloc() implementation
+allocates the memory as a private anonymous mapping
+using mmap(2).
+
+
+
+
+This data structure may be the following:
+1. A linked List with each node contains meta information about this group of blocks, information can include:
+   (1) the beginning of next block group (pointer to next node)
+   (2) if this group of blocks is free to use (typically a boolean value)
+   (3) the length of the avaliable blocks [so the total group size will be sizeof(Node) + length]
+We can call this node the meta information to record a block group
+
+2. The pointer we're gonna return is the address of the byte block after the meta information
+
+3. To free the block, the first thing we need to do is to stubtract the given pointer by sizeof(Node) so we can get the meta information about this block group
+
+
+
