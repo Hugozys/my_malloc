@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
   int expected_sum = 0;
   int *array[NUM_ITEMS];
 
-  size = 4;
+  size = 4; //size = 4
   expected_sum += size * size;
   array[0] = (int *)MALLOC(size * sizeof(int));
   for (i=0; i < size; i++) {
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
   FREE(array[4]);
 
-  size = 10;
+  size = 10; //mark here
   expected_sum += size * size;
   array[8] = (int *)MALLOC(size * sizeof(int));
   for (i=0; i < size; i++) {
