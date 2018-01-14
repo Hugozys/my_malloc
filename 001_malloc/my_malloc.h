@@ -10,10 +10,15 @@ void bf_free(void *ptr);
 
 typedef struct _Node_t{
   Node_t * next;
+  Node_t * prev;
   int blk_size;
   int isFree;
 } Node_t;
+ 
 
 extern Node_t * head = NULL;
-
+/*
+extern size_t heap_size = 0;
+extern size_t cur_add_size = 0;
+*/
 #endif
