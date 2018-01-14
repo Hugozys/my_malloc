@@ -27,9 +27,19 @@ void * add_new_segment(Node_t ** end, size_t size){
 
 
   //return the address of the actually avaliable byte block
-  return (Node *) first_byte_blk + 1;
+  return (Node_t *) first_byte_blk + 1;
 }
-  
+
+void * split_and_insert(Node_t * curr, size_t size){
+  void * new_meta_info = (int8_t *)curr + size + sizeof(Node_t); //curr address + request bytes + Node_t bytes                                                                 // is actually position of next free block             
+  Node_t temp = {.next = curr->next,.blk_size = curr->blk_size - sizeof(Node_t), .isFree = 1};
+  //this new free block group will point at the block group its ancestor pointing at
+  //the avaliable byte block number is equal to current blk number - Node size(meta info)
+  //and it is free
+  *((Node_t *) new_meta_info) = temp;
+  curr->next = (Node_t *) new_meta_info;
+  return (Node_t *) curr + 1;
+}
 void * ff_malloc(size_t size){
   if(size == 0){
     return NULL;
@@ -54,7 +64,7 @@ void * ff_malloc(size_t size){
         //if has enough space
 	  if(curr->blk_size >= size + sizeof(Node_t)){
           //split block and return the value
-	   return split_and_insert();
+	    return split_and_insert(curr, size);
 	  }
         //if not
 	  else{
@@ -73,3 +83,9 @@ void * ff_malloc(size_t size){
       
       
       
+void free(void * ptr){
+  if(ptr != NULL){
+    //free this block
+    //start from the head and defragment adjacent free blocks
+  }
+}
