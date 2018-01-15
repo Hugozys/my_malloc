@@ -6,7 +6,7 @@
 #define NUM_ITERS    10000
 #define NUM_ITEMS    10000
 #define ALLOC_SIZE   128
-
+#define INNER_ITERS  1000
 #ifdef FF
 #define MALLOC(sz) ff_malloc(sz)
 #define FREE(p)    ff_free(p)
@@ -56,13 +56,13 @@ int main(int argc, char *argv[])
   clock_gettime(CLOCK_MONOTONIC, &start_time);
 
   for (i=0; i < NUM_ITERS; i++) {
-    for (j=0; j < 1000; j++) {
+    for (j=0; j < INNER_ITERS; j++) {
       array[j] = (int *)MALLOC(ALLOC_SIZE);
     } //for j
 
-    for (j=1000; j < NUM_ITEMS; j++) {
+    for (j=INNER_ITERS; j < NUM_ITEMS; j++) {
       array[j] = (int *)MALLOC(ALLOC_SIZE);
-      FREE(array[j-1000]);
+      FREE(array[j-INNER_ITERS]);
 
       if ((i==NUM_ITERS/2) && (j==NUM_ITEMS/2)) {
 	//Record fragmentation halfway through (try to repsresent steady state)
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
       } //if
     } //for j
 
-    for (j=NUM_ITEMS-1000; j < NUM_ITEMS; j++) {
+    for (j=NUM_ITEMS-INNER_ITERS; j < NUM_ITEMS; j++) {
       FREE(array[j]);
     } //for j
   } //for i
