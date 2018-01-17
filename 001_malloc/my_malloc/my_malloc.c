@@ -155,17 +155,18 @@ void * bf_malloc(size_t size){
       return add_new_segment_head(&head,size);
     }
     else{ // this is not the first malloc call
-      Node_t * curr = head;
+      //Node_t * curr = head;
       Node_t * prev = NULL;
       Node_t * pt_cur_best = NULL;
-      size_t cur_best_size = UINT_MAX;
+      size_t cur_best_size = -1;
       find_best_position(size, &prev, &pt_cur_best, &cur_best_size);
       if(pt_cur_best != NULL){
 	if(cur_best_size == size){ //ideal fit
-	  curr->isFree = 0;
-	  return (void *) (curr + 1);
+	  pt_cur_best->isFree = 0;
+	  return (void *) (pt_cur_best + 1);
 	}
 	else{
+	  pt_cur_best->isFree = 0;
 	  return split_and_insert(pt_cur_best, size);
 	}
       }

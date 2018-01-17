@@ -1,0 +1,19 @@
+**********Result of BF*************
+
+
+=================equal_size_allocs=============
+Execution Time = 544.355714 seconds
+Fragmentation  = 0.360000
+
+
+=================large_range_rand_allocs=============
+Execution Time = 240.545087 seconds
+Fragmentation  = 0.044349
+
+
+=================small_range_rand_allocs=============
+data_segment_size = 3596960, data_segment_free_space = 68224
+Execution Time = 102.815891 seconds
+Fragmentation  = 0.018967
+
+
