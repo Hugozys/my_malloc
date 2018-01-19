@@ -52,7 +52,7 @@ void * add_new_segment(Node_t * curr, size_t size){
   /*
   Node_t *next_blk = (int8_t *) first_byte_blk + size + sizeof(Node_t);
   curr->next->next = next_blk; 
-  temp.isFree = 1;
+  temp.isFree =  1;
   temp.blk_num = cur_add_size - first_byte_blk->blk_num - 2*sizeof(Node_t);
   temp.prev = curr->next;
   *next_blk = temp;
