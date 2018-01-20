@@ -11,6 +11,7 @@
 #define FREE(p)    bf_free(p)
 #endif
 void print_Node_t(Node_t * ptNode_t){
+  printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
   Node_t* cur = ptNode_t;
   while(cur != NULL){
     printf("===================================\n");
@@ -18,8 +19,9 @@ void print_Node_t(Node_t * ptNode_t){
     printf("address of next Node_t: %p\n",cur->next);
     printf("address of prev Node_t: %p\n",cur->prev);
     printf("avalible blocks number for this region:%lu\n",cur->blk_num);
-    printf("is this region free to allocate: %d\n",cur->isFree);
-    printf("address of its adjacent region: %p\n",(int8_t *)(cur + 1) + cur->blk_num);
+    printf("address of next conseutive block: %p\n",cur->log_next);
+    printf("address of prev consecutive block: %p\n",cur->log_prev);
+    printf("address of its next adjacent region: %p\n",(int8_t *)(cur + 1) + cur->blk_num);
     cur = cur->next;
   }
 }
@@ -50,13 +52,13 @@ void blk_test_02_double_free(){
   print_asterik(10,2);
   char * array = MALLOC(5*sizeof(*array));
   FREE(array);
-  //FREE(array);
+  FREE(array);
 }
 
 char * blk_test_03_create_char_space(){
   print_asterik(10,3);
   char * array = MALLOC(5*sizeof(*array));
-  if(heap_size == 37){
+  if(heap_size == 45){
     printf("test passed\n");
     return array;
   }
@@ -81,6 +83,8 @@ void blk_test_05_free_and_malloc(char *array){
   printf("Heap Size is: %lu\n",heap_size);
   Node_t * cur = head;
   print_Node_t(cur);
+  printf("================================\n");
+  print_Node_t(free_head);
 }
   
 void blk_test_06_merge_adjacent(char * array){
@@ -96,9 +100,11 @@ void blk_test_06_merge_adjacent(char * array){
   printf("**********After free finished**********\n");
   cur = head;
   print_Node_t(cur);
+  print_Node_t(free_head);
   FREE(array3);
   printf("*********Now***************\n");
   print_Node_t(head);
+  print_Node_t(free_head);
 }
     
 void blk_test_07_ff_algorithm(){
@@ -142,13 +148,13 @@ void blk_test_09_increment_heap(){
 }
 int main(int argc,char * argv[]){
   blk_test_01_null();
-  blk_test_02_double_free();
+  //blk_test_02_double_free();
   char * arr = blk_test_03_create_char_space();
   blk_test_04_store_and_print(arr);
   blk_test_05_free_and_malloc(arr);
   blk_test_06_merge_adjacent(arr);
   blk_test_07_ff_algorithm();
-  blk_test_08_merge_adjacent_ver_2();
-  blk_test_09_increment_heap();
+  //blk_test_08_merge_adjacent_ver_2();
+  //blk_test_09_increment_heap();
   return (EXIT_SUCCESS);
 }

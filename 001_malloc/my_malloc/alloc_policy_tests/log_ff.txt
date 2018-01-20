@@ -2,18 +2,18 @@
 
 
 =================equal_size_allocs=============
-Execution Time = 510.221571 seconds
-Fragmentation  = 0.360000
+Execution Time = 2.933062 seconds
+Fragmentation  = 0.342857
 
 
 =================large_range_rand_allocs=============
-Execution Time = 144.038087 seconds
-Fragmentation  = 0.106988
+Execution Time = 30.551238 seconds
+Fragmentation  = 0.111409
 
 
 =================small_range_rand_allocs=============
-data_segment_size = 3829984, data_segment_free_space = 242656
-Execution Time = 96.160274 seconds
-Fragmentation  = 0.063357
+data_segment_size = 3973552, data_segment_free_space = 240696
+Execution Time = 5.138300 seconds
+Fragmentation  = 0.060575
 
 
