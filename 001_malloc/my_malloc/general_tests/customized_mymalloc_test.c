@@ -147,13 +147,14 @@ void blk_test_09_increment_heap(){
   FREE(array1);
 }
 int main(int argc,char * argv[]){
-  blk_test_01_null();
+  FREE((void *)0x01);
+  //blk_test_01_null();
   //blk_test_02_double_free();
-  char * arr = blk_test_03_create_char_space();
-  blk_test_04_store_and_print(arr);
-  blk_test_05_free_and_malloc(arr);
-  blk_test_06_merge_adjacent(arr);
-  blk_test_07_ff_algorithm();
+  //char * arr = blk_test_03_create_char_space();
+  //blk_test_04_store_and_print(arr);
+  //blk_test_05_free_and_malloc(arr);
+  //blk_test_06_merge_adjacent(arr);
+  //blk_test_07_ff_algorithm();
   //blk_test_08_merge_adjacent_ver_2();
   //blk_test_09_increment_heap();
   return (EXIT_SUCCESS);

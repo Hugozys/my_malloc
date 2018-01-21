@@ -240,39 +240,43 @@ void addToFreeList(Node_t * toAdd){
 void ff_free(void * ptr){
   if(ptr != NULL){
     Node_t * toCheck = (Node_t *) ptr - 1;
-    assert(!(toCheck->prev != NULL || toCheck->next != NULL || toCheck == free_head));
+    //assert(!(toCheck->prev != NULL || toCheck->next != NULL || toCheck == free_head));
+    if(toCheck > (Node_t *)sbrk(0) || toCheck < head){
+      fprintf(stderr,"Segmentation Fault\n");
+      exit(EXIT_FAILURE);
+    }
     if(toCheck->prev != NULL || toCheck->next != NULL || toCheck == free_head){
       fprintf(stderr,"double free for corruption\n");
       exit(EXIT_FAILURE);
     }
     //else{
     //look up to see if toCheck is head, if it is head, we don't need to check prev node
-      if(toCheck != head &&
-	 (toCheck->log_prev->next != NULL ||
-	 toCheck->log_prev->prev != NULL ||
-	  toCheck->log_prev == free_head)){
-	Node_t * temp = toCheck->log_prev;
-	merge_first_part(toCheck->log_prev);
-	if(temp != tail &&
-	   (temp->log_next->next != NULL ||
-	    temp->log_next->prev != NULL ||
-	    temp->log_next == free_head)){
-	  merge_second_part(temp);
-	}
+    if(toCheck != head &&
+       (toCheck->log_prev->next != NULL ||
+	toCheck->log_prev->prev != NULL ||
+	toCheck->log_prev == free_head)){
+      Node_t * temp = toCheck->log_prev;
+      merge_first_part(toCheck->log_prev);
+      if(temp != tail &&
+	 (temp->log_next->next != NULL ||
+	  temp->log_next->prev != NULL ||
+	  temp->log_next == free_head)){
+	merge_second_part(temp);
       }
-      else if(toCheck != tail &&
-	      (toCheck->log_next->next != NULL ||
-	       toCheck->log_next->prev != NULL ||
-	       toCheck->log_next == free_head)){
-	addToFreeList(toCheck);    
-	merge_second_part(toCheck);
-      }
-      else{
-	addToFreeList(toCheck);
-      }
-      //print_Node_t(head);        
-      //print_free_list(free_head);
     }
+    else if(toCheck != tail &&
+	    (toCheck->log_next->next != NULL ||
+	     toCheck->log_next->prev != NULL ||
+	     toCheck->log_next == free_head)){
+      addToFreeList(toCheck);    
+      merge_second_part(toCheck);
+    }
+    else{
+      addToFreeList(toCheck);
+    }
+    //print_Node_t(head);        
+    //print_free_list(free_head);
+  }
   //}
 }
 
