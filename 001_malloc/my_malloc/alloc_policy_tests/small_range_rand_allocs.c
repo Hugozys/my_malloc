@@ -51,12 +51,10 @@ int main(int argc, char *argv[]){
   const unsigned chunk_size = 32;
   const unsigned min_chunks = 4;
   const unsigned max_chunks = 16;
-  unsigned sum = 0;
   for (i=0; i < NUM_ITEMS; i++) {
     malloc_items[0][i].bytes = ((rand() % (max_chunks - min_chunks + 1)) + min_chunks) * chunk_size;
     malloc_items[1][i].bytes = ((rand() % (max_chunks - min_chunks + 1)) + min_chunks) * chunk_size;
     free_list[i] = i;
-    sum = sum + malloc_items[0][i].bytes;
   } //for i
 
   i = NUM_ITEMS;

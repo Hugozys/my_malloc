@@ -152,7 +152,7 @@ void find_best_position(size_t size, Node_t ** pt_pt_best, size_t * pt_best_size
       *pt_best_size = size;
       return;
     }
-    else if(curr->blk_num >= size + sizeof(Node_t) && curr->blk_num < *pt_best_size){
+    else if(curr->blk_num > size && curr->blk_num < *pt_best_size){
       *pt_pt_best = curr;
       *pt_best_size = curr->blk_num;
     }
@@ -173,7 +173,7 @@ void * bf_malloc(size_t size){
       size_t cur_best_size = -1;
       find_best_position(size,&pt_cur_best, &cur_best_size);
       if(pt_cur_best != NULL){
-	if(cur_best_size == size){ //ideal fit
+	if(cur_best_size >= size && cur_best_size < size + sizeof(Node_t)){ //no split fit
 	  deleteNode(pt_cur_best);
 	  return (void *) (pt_cur_best + 1);
 	}
@@ -298,7 +298,7 @@ unsigned long get_data_segment_free_space_size(){
   Node_t* cur = free_head;
   unsigned long sum = 0;
   while(cur != NULL){
-    sum = sum + cur->blk_num;
+    sum = sum + cur->blk_num /*+ sizeof(Node_t)*/;
     cur = cur->next;
   }
   return sum;
