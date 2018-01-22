@@ -137,7 +137,7 @@ void * split_and_insert(Node_t * curr, size_t size){
 
 
 
-###_II. small_range_rand_allocs_
+### _II. small_range_rand_allocs_
 
 ---
 
@@ -179,7 +179,7 @@ But the ***best_fit*** algorithm will try to find the block group with the most 
 
 * Due to more fragmentation, ***first_fit*** will call more times of `sbrk()` to malloc space for users, which also increment the execution time.
 
-###_III. large_range_rand_allocs_ 
+### _III. large_range_rand_allocs_ 
 
 ----
 
