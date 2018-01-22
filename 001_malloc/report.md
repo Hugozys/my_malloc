@@ -1,4 +1,4 @@
-# LIBMYMALLOC
+#LIBMYMALLOC
 
 
 
@@ -123,15 +123,13 @@ void * split_and_insert(Node_t * curr, size_t size){
 
 > first_fit_implementation:
 >
-> ​	Execution Time = 2.933062 seconds
->
-> ​	Fragmentation = 0.342857
+> ​	Execution Time = 1.763137 seconds
+> ​	Fragmentation  = 0.342857
 >
 > best_fit_implementation:
 >
-> ​	Execution Time = 3.793682 seconds
->
-> ​	Fragmentation = 0.342857
+> ​	Execution Time = 2.052996 seconds
+> ​	Fragmentation  = 0.342857
 
   First we need an overview about what this testing program does. This testing program basically allocate **2*NUM_ITEMS** pieces of segment, each of which is exactly _128 bytes_. The allocated pieces are divided into _`array`_ and  `spacing_array`. `spacing_array` is just like bulkhead that separates two consecutive `array` segments. Then it frees all _`array`_ segments, but leaving `spacing_array` unchanged.  After that it mallocs **INNER_ITERS** pieces of segments and keeps this amount of allocated `array` by mallocing repeatedly new piece and freeing the previous piece.
 
@@ -147,21 +145,19 @@ First as always, given the execution result:
 
 >first_fit_implementation:
 >
->​	data_segment_size = 3973552, data_segment_free_space = 240696  
->
->​	Execution Time = 5.138300 seconds  
->
->​	Fragmentation = 0.060575
+>​	data_segment_size = 3973552, data_segment_free_space = 240696
+>​	Execution Time = 3.555274 seconds
+>​	Fragmentation  = 0.060575
 >
 >best_fit_implementation:
 >
->​	data_segment_size = 3733008, data_segment_free_space = 90536
->
->​	Execution Time = 6.795355 seconds
->
->​	Fragmentation  = 0.024253
+>​	data_segment_size = 3713888, data_segment_free_space = 67328
+>​	Execution Time = 1.434206 seconds
+>​	Fragmentation  = 0.018129
 
-As said in `README` file, this program allocate a large number (default 10000) of segments ranging from 128 to 512 bytes. And it alternates freeing a random selection of 50 of those, and mallocing 50 more regions with a random size from 128 - 512 bytes. Best_fit still takes longer than first_fit because it needs to search through the whole free linked list to find the accurate **BG** to allocate while first_fit only needs to find the first available. When allocating blocks, ***best_fit*** always finds a **BG** with the exact same available **ADS** as user requests for (in this case) so that there won't be split happening. However, if you use ***first_fit** algorithm, `i.e:` a `128 bytes` request may occupy a **BG** with 512 bytes available **ADS**'s **BG**, which makes the next `512 bytes` request not able to find an available place to sit in current data segment( because the `512 bytes` block group has already been taken), thus resulting in increase of heap size. Another example will be easy to understand why `data_segment_free_space` for ***best_fit*** will be less than ***first_fit***. Let's say we have the following heap organization:
+  As said in `README` file, this program allocate a large number (default 10000) of segments ranging from 128 to 512 bytes. And it alternates freeing a random selection of 50 of those, and mallocing 50 more regions with a random size from 128 - 512 bytes. 
+
+  When allocating blocks, ***best_fit*** always finds a **BG** with the exact same available **ADS** as user requests for (in this case) so that there won't be split happening. However, if you use ***first_fit*** algorithm, `i.e:` a `128 bytes` request may occupy a **BG** with 512 bytes available **ADS**'s **BG**, which makes the next `512 bytes` request not able to find an available place to sit in current data segment( because the `512 bytes` block group has already been taken), thus resulting in increase of heap size. Another example will be easy to understand why `data_segment_free_space` for ***best_fit*** will be less than ***first_fit***. Let's say we have the following heap organization:
 
 * 1000K free | 100K allocated | 30K free
 
@@ -175,19 +171,27 @@ But the ***best_fit*** algorithm will try to find the block group with the most 
 
 ***best_fit*** algorithm improves the utilization efficiency, so it will has fewer useless free block group.
 
+  Now let's take a look at the execution time of the allocation policies. At first glance, you may seem very surprise that ***best_bit*** actually have a better performance than ***first_fit***. You may think that in order to find the **BG** with the best size, should ***best_fit*** go through the whole free list each time while ***first_fit*** only need to find the first available **BG**? What the heck is going on here? Well, this is not always the case. Firstly, if the current **BG's** available size is exactly the same as the user requests for, then we don't need to continue searching since this is definitely the best block group. Secondly, remember what we mentioned when we talked about the data_segment_size:
+
+* ***first_fit*** will result in more split of block group, since there are more  
+
+  pieces and bits free memory **BGs** that are sparse through the whole data segment area. This will make the length of free linked list longer than the one in ***best_fit*** algorithm and this will inevitably increase the search time.
+
+* Due to more fragmentation, ***first_fit*** will call more times of `sbrk()` to malloc space for users, which also increment the execution time.
+
 ###_III. large_range_rand_allocs_ 
 
 ----
 
 > first_fit_implementation:
 >
-> ​	Execution Time = 30.551238 seconds
+> ​	Execution Time = 28.642433 seconds
 > ​	Fragmentation  = 0.111409
 >
 > best_fit_implementation:
 >
-> ​	Execution Time = 123.218738 seconds
-> ​	Fragmentation  = 0.041121
+> ​	Execution Time = 106.584593 seconds
+> ​	Fragmentation  = 0.040612
 
   The basic pattern of this program is the same as the `small range` one except that the allocated block size is ranging from `128 B` to `64 KB`. 
 
@@ -197,10 +201,12 @@ But the ***best_fit*** algorithm will try to find the block group with the most 
 * Since the range is larger, there will be more `malloc` operation on space with larger discrepancy, which will result in more split operation when `mallocing`. This will make more number of block group inside free linked list. So it will increase the time to search available free block group to `malloc` next time. (O(N), N is increasing)
 
 
+WAIT! At this time, you may feel extremely confused? What? Yes, it is the exact same pattern as that in the **small_range_allocs** policy, so the trends should be the same. But the ***best_fit*** becomes the slower one this time. It's chaos! If you see this more carefully, you will notice that the range of this policy changes from `128 B` to `64 KB`. It is actually quite different from the **small_range** one. Statistically, size of every block group will be much more different from other ones. So it will be much harder for ***best_fit*** to find a **BG** with the exact same size. In this case, split possibility won't differ very much in two allocation policy. So ***best_fit*** becomes the slower one again! 
+
 
 ## _Section 3: Summary_
 
-  ***first_fit*** algorithm have less execution time(better performance ), but with poor heap utilization efficiency. On the other hand, ***best_fit*** algorithm have more execution time(poor performance), but with pretty good heap utilization efficiency (fragmentation is lower). If you are using `malloc` in the situation when performance is not the issue but the computer's memory is limited, then ***best_fit*** will be a better choice. Otherwise, ***first_fit*** will reduce time complexity of your program.
+  ***first_fit*** algorithm have less execution time(better performance ), but with poor heap utilization efficiency. On the other hand, ***best_fit*** algorithm have more execution time(poor performance), but with pretty good heap utilization efficiency (fragmentation is lower). If you are using `malloc` in the situation when performance is not the issue but the computer's memory is limited, then ***best_fit*** will be a better choice. Otherwise, ***first_fit*** will reduce time complexity of your program. However, if you are frequently allocating and freeing blocks in a relatively small range, you can achieve both benefits with ***best_fit*** algorithm.
 
 
 
