@@ -39,8 +39,7 @@ malloc_list_t malloc_items[2][NUM_ITEMS];
 unsigned free_list[NUM_ITEMS];
 
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
   int i, j, k;
   unsigned tmp;
   unsigned long data_segment_size;
