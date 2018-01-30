@@ -3,10 +3,10 @@
 #include <time.h>
 #include "my_malloc.h"
 
-#define NUM_ITERS    10000
+#define NUM_ITERS    10000 //10000
 #define NUM_ITEMS    10000
 #define ALLOC_SIZE   128
-#define INNER_ITERS  1000
+#define INNER_ITERS  1000 //1000
 #ifdef FF
 #define MALLOC(sz) ff_malloc(sz)
 #define FREE(p)    ff_free(p)

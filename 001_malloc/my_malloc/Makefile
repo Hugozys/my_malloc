@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS= -O3 -fPIC
+CFLAGS= -ggdb3 -fPIC
 DEPS=my_malloc.h
 WE = -Wall -Werror -pedantic
 #DEBUG = -ggdb3
