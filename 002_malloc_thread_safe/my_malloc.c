@@ -11,7 +11,10 @@ Node_t * free_head = NULL;
 Node_t * head = NULL; //global variable we're gonna use
 size_t heap_size = 0;
 
+__thread Node_t * free_head_nolock = NULL; //this is used for lock free malloc
 
+//size of meta information
+const size_t metaSize = sizeof(Node_t); 
 
 pthread_mutex_t sbrk_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -30,7 +33,7 @@ void * ts_malloc_lock(size_t size){
       size_t cur_best_size = -1;
       find_best_position(size,&pt_cur_best, &cur_best_size);
       if(pt_cur_best != NULL){
-	if(cur_best_size >= size && cur_best_size < size + sizeof(Node_t)){ //no split fit
+	if(cur_best_size >= size && cur_best_size < size + metaSize){ //no split fit
 	  deleteNode(pt_cur_best);
 	  ans = (void *) (pt_cur_best + 1);
 	}
@@ -89,10 +92,10 @@ void ts_free_lock(void * ptr){
 void * add_new_segment_head(size_t size){
   //no other thread can increment the heap
   Node_t * first_byte_blk = sbrk(0);
-  if(sbrk((sizeof(Node_t) + size)) == (void *) -1){
+  if(sbrk((metaSize + size)) == (void *) -1){
     return NULL;
   }
-  heap_size = heap_size + sizeof(Node_t) + size;
+  heap_size = heap_size + metaSize + size;
   head = first_byte_blk;
   tail = head;
   Node_t temp= {.next = NULL, .prev = NULL, .blk_num = size, .log_prev = NULL, .log_next = NULL};
@@ -102,10 +105,10 @@ void * add_new_segment_head(size_t size){
 
 void * add_new_segment(Node_t * curr, size_t size){
   Node_t * first_byte_blk = sbrk(0);
-  if(sbrk(size + sizeof(Node_t)) == (void *) -1){
+  if(sbrk(size + metaSize) == (void *) -1){
     return NULL;
   }
-  heap_size = heap_size + sizeof(Node_t) + size;
+  heap_size = heap_size + metaSize + size;
   Node_t temp = {.next = NULL, .prev = NULL, .blk_num = size, .log_prev = curr, .log_next = NULL};
   curr->log_next = first_byte_blk;
   tail = first_byte_blk; //change tail
@@ -114,8 +117,8 @@ void * add_new_segment(Node_t * curr, size_t size){
 }
 
 void * split_and_insert(Node_t * curr, size_t size){
-  Node_t * new_meta_info = (Node_t *)( (int8_t *)curr + size + sizeof(Node_t)); //curr address + request bytes + Node_t bytes                                                                 // is actually position of next free block
-  Node_t temp = {.next = NULL, .prev = NULL, .blk_num = curr->blk_num - size - sizeof(Node_t), .log_prev = curr, .log_next = curr->log_next};
+  Node_t * new_meta_info = (Node_t *)( (int8_t *)curr + size + metaSize); //curr address + request bytes + Node_t bytes                                                                 // is actually position of next free block
+  Node_t temp = {.next = NULL, .prev = NULL, .blk_num = curr->blk_num - size - metaSize, .log_prev = curr, .log_next = curr->log_next};
   *new_meta_info = temp;
   deleteNode(curr);
   addToFreeList(new_meta_info);
@@ -173,7 +176,7 @@ void find_best_position(size_t size, Node_t ** pt_pt_best, size_t * pt_best_size
 
   
 void merge_first_part(Node_t * mergeHead){
-  mergeHead->blk_num = mergeHead->blk_num + sizeof(Node_t) + mergeHead->log_next->blk_num;
+  mergeHead->blk_num = mergeHead->blk_num + metaSize + mergeHead->log_next->blk_num;
   mergeHead->log_next = mergeHead->log_next->log_next;
   if(mergeHead->log_next != NULL){
     mergeHead->log_next->log_prev = mergeHead;
@@ -204,6 +207,52 @@ void addToFreeList(Node_t * toAdd){
 
     
 
+//Thread Safe malloc/free: non-locking version
+void *ts_malloc_nolock(size_t size){
+  if (size == 0){
+    return NULL;
+  }
+  else{
+    void * ans;
+    pthread_mutex_lock(&sbrk_lock);
+    Node_t * new_blk = sbrk(metaSize + size);
+    pthread_mutex_unlock(&sbrk_lock);
+    new_blk = 
+
+
+void ts_free_nolock(void *ptr);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -218,7 +267,7 @@ unsigned long get_data_segment_free_space_size(){
   Node_t* cur = free_head;
   unsigned long sum = 0;
   while(cur != NULL){
-    sum = sum + cur->blk_num /*+ sizeof(Node_t)*/;
+    sum = sum + cur->blk_num /*+ metaSize*/;
     cur = cur->next;
   }
   return sum;

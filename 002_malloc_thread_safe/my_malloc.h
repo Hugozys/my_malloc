@@ -26,7 +26,7 @@ struct _Node_t{
 
 //typedef struct _Node_t Node_t;
 extern Node_t * tail;
-extern Node_t * free_head; 
+extern __thread Node_t * free_head; 
 extern size_t heap_size;
 extern Node_t * head;
 void addToFreeList(Node_t * toAdd);
