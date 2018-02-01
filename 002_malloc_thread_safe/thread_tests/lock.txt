@@ -1,40 +1,40 @@
-
+ *******************Result of Lock *****************
 
 ========================thread_test_malloc_free===========================
 No overlapping allocated regions found!
 Test passed
 
-real	0m8.101s
-user	0m8.044s
-sys	0m0.056s
+real	0m8.016s
+user	0m7.968s
+sys	0m0.048s
 
 
 ========================thread_test_measurement===========================
 No overlapping allocated regions found!
 Test passed
-Execution Time = 0.224388 seconds
-Data Segment Size = 43224688 bytes
+Execution Time = 0.251747 seconds
+Data Segment Size = 43598688 bytes
 
-real	0m31.635s
-user	0m31.560s
-sys	0m0.096s
+real	0m30.363s
+user	0m30.224s
+sys	0m0.144s
 
 
 ========================thread_test_malloc_free_change_thread===========================
 No overlapping allocated regions found!
 Test passed
 
-real	0m8.777s
-user	0m8.748s
-sys	0m0.024s
+real	0m8.897s
+user	0m8.860s
+sys	0m0.028s
 
 
 ========================thread_test===========================
 No overlapping allocated regions found!
 Test passed
 
-real	0m8.305s
-user	0m8.248s
-sys	0m0.052s
+real	0m8.316s
+user	0m8.264s
+sys	0m0.048s
 
 

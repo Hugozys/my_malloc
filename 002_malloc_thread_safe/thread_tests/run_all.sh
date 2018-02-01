@@ -1,6 +1,6 @@
 #! /bin/bash
 
-echo " *******************Result of Lock Free*****************" >> lock_free.txt
+echo " *******************Result of Lock *****************" >> lock
 
 echo"">>lock.txt
 echo"">>lock.txt

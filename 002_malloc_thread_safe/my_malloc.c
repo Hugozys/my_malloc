@@ -9,7 +9,9 @@
 
 
 //define TLS free_head
-__thread Node_t * freeHead = NULL;
+__thread Node_t * freeHeadLocal = NULL;
+//define global freeHead
+Node_t * freeHeadGlobal = NULL;
 size_t heap_size = 0;
 //define overhead size(meta information)
 const size_t metaSize = sizeof(Node_t);
@@ -18,7 +20,7 @@ const size_t metaSize = sizeof(Node_t);
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 
-Node_t * searchFit(size_t size){
+Node_t * searchFit(Node_t * freeHead, size_t size){
   Node_t * curr = freeHead;
   //unsigned integer overflowed
   //this will get us the maximum value for size_t
@@ -37,10 +39,10 @@ Node_t * searchFit(size_t size){
   return currBestPtr;
 }
 
-void replaceNode(Node_t * beReplaced, Node_t *toAdd){
+void replaceNode(Node_t ** freeHead, Node_t * beReplaced, Node_t *toAdd){
   if(beReplaced->prev_free == NULL){
     //this is the first node
-    freeHead = toAdd;
+    *freeHead = toAdd;
   }
   else{ //not the first node
     beReplaced->prev_free->next_free = toAdd;
@@ -53,22 +55,22 @@ void replaceNode(Node_t * beReplaced, Node_t *toAdd){
   toAdd->next_free = beReplaced->next_free;
 }
 
-void * split(Node_t * toSplit, size_t size){
+void * split(Node_t ** freeHead, Node_t * toSplit, size_t size){
   Node_t * new_meta_ptr = (Node_t *)((int8_t *)toSplit + metaSize + size);
   Node_t temp = {.prev_free = toSplit->prev_free, .next_free = toSplit->next_free, .blk_size = toSplit->blk_size - size - metaSize};
   *new_meta_ptr = temp;
   //you will need to replace the orignal node inside the free Linked list with the new node that is splitted
   toSplit->blk_size = size; 
-  replaceNode(toSplit, new_meta_ptr);
+  replaceNode(freeHead,toSplit, new_meta_ptr);
   //you will return the location of the orignal node
   //since that is the space you are going to malloc
   return (void *) (toSplit + 1);
   
 }
 
-void deleteNode(Node_t * toDelete){
+void deleteNode(Node_t ** freeHead, Node_t * toDelete){
   if(toDelete->prev_free == NULL){ //head node
-    freeHead = toDelete->next_free;
+    *freeHead = toDelete->next_free;
   }
   else{
     toDelete->prev_free->next_free = toDelete->next_free;
@@ -88,7 +90,7 @@ void * ts_malloc_lock(size_t size){
   else{
     void * ans = NULL;
     pthread_mutex_lock(&lock);
-    Node_t * bestNode = searchFit(size);
+    Node_t * bestNode = searchFit(freeHeadGlobal, size);
     if(bestNode == NULL){
       //no available area, we need to sbrk()
       Node_t * ptr_new_meta = (Node_t *) sbrk(size + metaSize);
@@ -103,10 +105,10 @@ void * ts_malloc_lock(size_t size){
       //there is bestNode
       //if we block is big, we need to split the block
       if(bestNode->blk_size >= size + metaSize){
-	ans = split(bestNode, size);
+	ans = split(&freeHeadGlobal, bestNode, size);
       }
       else{
-	deleteNode(bestNode);
+	deleteNode(&freeHeadGlobal, bestNode);
 	ans = (void *) (bestNode + 1);
       }
     }
@@ -128,8 +130,8 @@ void merge(Node_t * first, Node_t * second){
   }
 }
 
-void addNode(Node_t * toAdd){
-  Node_t ** curr = &freeHead;
+void addNode(Node_t ** freeHead, Node_t * toAdd){
+  Node_t ** curr = freeHead;
   Node_t * prev = NULL;
   while(*curr != NULL){
     if( *curr > toAdd){ //use address as critical element
@@ -154,7 +156,7 @@ void * ts_malloc_nolock(size_t size){
   }
   else{
     void * ans = NULL;
-    Node_t * bestNode = searchFit(size);
+    Node_t * bestNode = searchFit(freeHeadLocal, size);
     if(bestNode == NULL){
       //no available area, we need to sbrk()
       pthread_mutex_lock(&lock);
@@ -171,10 +173,10 @@ void * ts_malloc_nolock(size_t size){
       //there is bestNode
       //if we block is big, we need to split the block
       if(bestNode->blk_size >= size + metaSize){
-	ans = split(bestNode, size);
+	ans = split(&freeHeadLocal, bestNode, size);
       }
       else{
-	deleteNode(bestNode);
+	deleteNode(&freeHeadLocal, bestNode);
 	ans = (void *) (bestNode + 1);
       }
     }
@@ -186,7 +188,7 @@ void * ts_malloc_nolock(size_t size){
 void ts_free_nolock(void * ptr){
    if(ptr != NULL){
     Node_t * candidate =  (Node_t *)ptr - 1;
-    addNode(candidate);
+    addNode(&freeHeadLocal, candidate);
     Node_t * mergeHead = candidate->prev_free;
     Node_t * mergeTail = candidate->next_free;
     if(mergeHead == NULL){
@@ -215,7 +217,7 @@ void ts_free_lock(void * ptr){
   if(ptr != NULL){
     pthread_mutex_lock(&lock);
     Node_t * candidate =  (Node_t *)ptr - 1;
-    addNode(candidate);
+    addNode(&freeHeadGlobal, candidate);
     Node_t * mergeHead = candidate->prev_free;
     Node_t * mergeTail = candidate->next_free;
     if(mergeHead == NULL){
@@ -235,7 +237,7 @@ void ts_free_lock(void * ptr){
 }
 
 
-unsigned long get_data_segment_size(){
+/*unsigned long get_data_segment_size(){
   return heap_size;
 }
 
@@ -243,8 +245,10 @@ unsigned long get_data_segment_free_space_size(){
   Node_t* cur = freeHead;
   unsigned long sum = 0;
   while(cur != NULL){
-    sum = sum + cur->blk_size /*+ sizeof(Node_t)*/;
+    sum = sum + cur->blk_size + sizeof(Node_t);
     cur = cur->next_free;
   }
   return sum;
 }
+
+*/

@@ -11,8 +11,8 @@
  **/
 
 
-unsigned long get_data_segment_size();
-unsigned long get_data_segment_free_space_size();
+//unsigned long get_data_segment_size();
+//unsigned long get_data_segment_free_space_size();
 
 
 
@@ -27,12 +27,12 @@ void * ts_malloc_nolock(size_t size);
 void ts_free_nolock(void * ptr);
 void * ts_malloc_lock(size_t size);
 void ts_free_lock(void *ptr);
-Node_t * searchFit(size_t size);
-void replaceNode(Node_t * beReplaced, Node_t * toAdd);
-void * split(Node_t * toSplit, size_t size);
+Node_t * searchFit(Node_t * freeHead, size_t size);
+void replaceNode(Node_t ** freeHead, Node_t * beReplaced, Node_t * toAdd);
+void * split(Node_t ** freeHead, Node_t * toSplit, size_t size);
 
 void merge(Node_t * first, Node_t * second);
 
-void addNode(Node_t * toAdd);
+void addNode(Node_t ** freeHead, Node_t * toAdd);
 
 #endif
